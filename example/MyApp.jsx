@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Share from '../lib/components/Share';
 
 const MyApp = (props) => {
@@ -35,11 +36,11 @@ const MyApp = (props) => {
 };
 
 MyApp.propTypes = {
-  author: React.PropTypes.string.isRequired,
-  title: React.PropTypes.string.isRequired,
-  description: React.PropTypes.string.isRequired,
-  url: React.PropTypes.string.isRequired,
-  image: React.PropTypes.string.isRequired
+  author: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  url: PropTypes.string.isRequired,
+  image: PropTypes.string.isRequired
 };
 
 MyApp.defaultProps = {

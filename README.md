@@ -35,7 +35,7 @@ See `./example/MyApp.jsx`
 | className | `"share-actions"` | The class name that will be given to the container component. |
 | thisComponent | `"div"` | The HTML element or React Component that will be used as the container. |
 
-## render()
+### render()
 Returns the wrapper component, a `<script>` tag containing the JSON schema, and whatever `children` are passed to this component.
 
 ---
@@ -55,17 +55,83 @@ Returns the wrapper component, a `<script>` tag containing the JSON schema, and 
 | count | Contains the value of the last fetched count. |
 | lastFetch | The timestamp (in milliseconds) of the last fetch |
 
-### static popup(url, inputOptions, callback)
+### setCount(count)
+Updates `this.state.count` and `this.state.lastFetch`
+
+### getCount()
+Returns the last known count. If `this.props.count` is specified (live refreshing disabled), it will return that value. If not set (live refreshing enabled) then `this.state.count` will be returned if the value is fresh.
+
+Otherwise, `this.updateCount` will be called and `this.state.count` will be returned immediately.
+
+### updateCount()
+This method will error out unless it is defined in classes extending from `BaseButton`.
+
+### countNode()
+Returns the count component or HTML element with the latest fetched value.
+
+### render()
+Provides default markup that can be overridden. Provides hooks to `onClick`
+
+---
+
+## FacebookButton
+### onClick()
+Spawns a popup for the Facebook Sharer.
+
+### getCount(): Promise
+Retrieves the latest count from Facebook and resolves.
+
+---
+
+## PinterestButton
+### onClick()
+Spawns a popup for the Pinterest Sharer.
+
+### getCount(): Promise
+Retrieves the latest count from Pinterest and resolves
+
+---
+
+## TwitterButton
+### getTwitterHandle()
+If specified, this will always return `this.props.twitterHandle`
+
+Else, it will try to detect the handle from the schema using `resolveSocial(schema, test)`
+
+### onClick()
+Spawns a popup for the Tweet and/or Retweet Intents.
+If specified, `this.props.tweetID` will prompt a Retweet instead of a Tweet intent.
+
+### getCount(): Promise
+Immediately rejects because Twitter does not provide share counts.
+
+---
+
+## TumblrButton
+### onClick()
+Spawns a popup for the Tumblr Sharer.
+
+### getCount()
+Retrieves the latest count from Tumblr and resolves.
+
+---
+
+## popup.js
+
+### popup(url, inputOptions, callback)
 Spawns a new popup window. If specified a `callback` function will be called when the popup window is closed.
 
-### static getTitleAttribute(schema)
+---
+
+## selectors.js
+### getTitleAttribute(schema)
 Returns the schema attribute designated as a story's title.
 
-### static getBodyAttribute(schema)
+### getBodyAttribute(schema)
 Returns the schema attribute designated as a story's content body.
 
 
-### static getImageAttribute(schema)
+### getImageAttribute(schema)
 Returns the schema attribute for the most likely image, in the following order of first available:
 - schema.image
 - schema.author.image
@@ -73,7 +139,7 @@ Returns the schema attribute for the most likely image, in the following order o
 
 If none of these are available, a deep search will occur for an object where `@type = "ImageObject"` and return the first match.
 
-### static resolveSocial(schema, test)
+### resolveSocial(schema, test)
 Returns the first object in the following list where a value matches `test`
 - schema.author.sameAs
 - schema.publisher.sameAs
@@ -83,67 +149,6 @@ Returns the first object in the following list where a value matches `test`
 #### Example:
 `resolveSocial(schema, (a) => a.indexOf('twitter.com') !== -1);`
 
-### this.getSchema()
-Returns the `schema` property specified either in `this.props` or `this.context`
-
-### this.setCount(count)
-Updates `this.state.count` and `this.state.lastFetch`
-
-### this.getCount()
-Returns the last known count. If `this.props.count` is specified (live refreshing disabled), it will return that value. If not set (live refreshing enabled) then `this.state.count` will be returned if the value is fresh.
-
-Otherwise, `this.updateCount` will be called and `this.state.count` will be returned immediately.
-
-### this.updateCount()
-This method will error out unless it is defined in classes extending from `BaseButton`.
-
-### this.countNode()
-Returns the count component or HTML element with the latest fetched value.
-
-### render()
-Provides default markup that can be overridden. Provides hooks to `onClick`
-
----
-
-## FacebookButton < BaseButton
-### this.onClick()
-Spawns a popup for the Facebook Sharer.
-
-### this.updateCount()
-Retrieves the latest count from Facebook and updates the state (does not override props).
-
----
-
-## PinterestButton < BaseButton
-### this.onClick()
-Spawns a popup for the Pinterest Sharer.
-
-### this.updateCount()
-Retrieves the latest count from Pinterest and updates the state (does not override props).
-
----
-
-## TwitterButton < BaseButton
-### this.getTwitterHandle()
-If specified, this will always return `this.props.twitterHandle`
-
-Else, it will try to detect the handle from the schema using `resolveSocial(schema, test)`
-
-### this.onClick()
-Spawns a popup for the Tweet and/or Retweet Intents.
-If specified, `this.props.tweetID` will prompt a Retweet instead of a Tweet intent.
-
-### this.updateCount()
-Does nothing, Twitter does not provide counts (thanks Twitter!)
-
----
-
-## TumblrButton < BaseButton
-### this.onClick()
-Spawns a popup for the Tumblr Sharer.
-
-### this.updateCount()
-Retrieves the latest count from Tumblr and updates the state (does not override props).
 
 ---
 

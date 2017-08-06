@@ -1,11 +1,21 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import BaseButton from './BaseButton';
 import TwitterIcon from './Icons/Twitter';
 
-export default class TwitterButton extends BaseButton {
+import {
+  getTitleAttribute,
+  getURLAttribute,
+  resolveSocial
+} from '../selectors';
+import popup from '../popup';
+export default class TwitterButton extends React.PureComponent {
   static propTypes = {
-    children: React.PropTypes.node.isRequired,
-    count: React.PropTypes.number
+    children: PropTypes.node.isRequired,
+    count: PropTypes.number,
+    twitterHandle: PropTypes.string,
+    tweetID: PropTypes.string,
+    schema: PropTypes.object
   }
 
   static defaultProps = {
@@ -17,13 +27,21 @@ export default class TwitterButton extends BaseButton {
     tweetID: null
   }
 
+  static contextTypes = {
+    schema: PropTypes.object
+  }
+
+  getSchema() {
+    return 'schema' in this.props ? this.props.schema : this.context.schema;
+  }
+
   getTwitterHandle() {
-    if ('twitterHandle' in this.props && this.props.twitterHandle) {
+    if (this.props.twitterHandle) {
       return this.props.twitterHandle;
     }
 
     const schema = this.getSchema();
-    const twitterProfile = this.constructor.resolveSocial(schema, (a) => a.indexOf('twitter.com') !== -1);
+    const twitterProfile = resolveSocial(schema, (a) => a.indexOf('twitter.com') !== -1);
 
     if (twitterProfile) {
       try {
@@ -48,23 +66,33 @@ export default class TwitterButton extends BaseButton {
         url.searchParams.set('related', twitterHandle);
       }
     } else {
-      url.searchParams.set('text', this.constructor.getTitleAttribute(this.getSchema()));
-      url.searchParams.set('url', this.constructor.getURLAttribute(this.getSchema()));
+      url.searchParams.set('text', getTitleAttribute(this.getSchema()));
+      url.searchParams.set('url', getURLAttribute(this.getSchema()));
 
       if (twitterHandle) {
         url.searchParams.set('via', twitterHandle);
       }
     }
 
-    this.constructor.popup(url.toString());
+    popup(url.toString());
   }
 
-  getCount() {
-    return this.props.count;
+  getCount = () => {
+    return new Promise((resolve, reject) => {
+      reject();
+    });
   }
 
-  updateCount() {
-    // Thanks Twitter...
-    return null;
+  render() {
+    const { children, ...otherProps } = this.props;
+
+    return (
+      <BaseButton
+        onClick={this.onClick}
+        getCount={this.getCount}
+        {...otherProps}>
+        {children}
+      </BaseButton>
+    );
   }
 }

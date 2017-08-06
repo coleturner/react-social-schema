@@ -1,13 +1,22 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import BaseButton from './BaseButton';
 import PinterestIcon from './Icons/Pinterest';
 import jsonp from 'jsonp';
 
-export default class PinterestButton extends BaseButton {
+import {
+  getImageAttribute,
+  getTitleAttribute,
+  getURLAttribute
+} from '../selectors';
+import popup from '../popup';
+
+export default class PinterestButton extends React.PureComponent {
   static propTypes = {
-    children: React.PropTypes.node.isRequired,
-    count: React.PropTypes.number,
-    fetchTimeoutMS: React.PropTypes.number
+    children: PropTypes.node.isRequired,
+    count: PropTypes.number,
+    fetchTimeoutMS: PropTypes.number,
+    schema: PropTypes.object
   }
 
   static defaultProps = {
@@ -19,34 +28,58 @@ export default class PinterestButton extends BaseButton {
     fetchTimeoutMS: 3600 * 1000
   }
 
+  static contextTypes = {
+    schema: PropTypes.object
+  }
+
+  getSchema() {
+    return 'schema' in this.props ? this.props.schema : this.context.schema;
+  }
+
+
   onClick() {
     const url = new URL('https://pinterest.com/pin/create/button');
-    url.searchParams.set('description', this.constructor.getTitleAttribute(this.getSchema()));
-    url.searchParams.set('url', this.constructor.getURLAttribute(this.getSchema()));
+    url.searchParams.set('description', getTitleAttribute(this.getSchema()));
+    url.searchParams.set('url', getURLAttribute(this.getSchema()));
 
-    const image = this.constructor.getImageAttribute(this.getSchema());
+    const image = getImageAttribute(this.getSchema());
     if (image) {
       url.searchParams.set('media', image.url);
     }
 
-    this.constructor.popup(url.toString());
+    popup(url.toString());
   }
 
-  updateCount() {
-    const url = this.constructor.getURLAttribute(this.getSchema());
-    const requestURL = new URL('https://api.pinterest.com/v1/urls/count.json');
-    requestURL.searchParams.set('url', url);
+  getCount() {
+    return new Promise((resolve, reject) => {
+      const url = getURLAttribute(this.getSchema());
+      const requestURL = new URL('https://api.pinterest.com/v1/urls/count.json');
+      requestURL.searchParams.set('url', url);
 
-    try {
-      jsonp(url.toString(), (err, data) => {
-        if (!err && !!data && 'count' in data) {
-          this.setCount(data.count);
-        } else {
-          throw new 'Failed to get Pinterest count...';
-        }
-      });
-    } catch (e) {
-      this.setCount(this.state.count);
-    }
+      try {
+        jsonp(url.toString(), (err, data) => {
+          if (!err && !!data && 'count' in data) {
+            resolve(data.count);
+          } else {
+            throw new Error('Failed to get Pinterest count...');
+          }
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  render() {
+    const { children, ...otherProps } = this.props;
+
+    return (
+      <BaseButton
+        onClick={this.onClick}
+        getCount={this.getCount}
+        {...otherProps}>
+        {children}
+      </BaseButton>
+    );
   }
 }

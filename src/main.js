@@ -1,3 +1,4 @@
+import 'url-polyfill';
 export Container from './components/Container';
 export BaseButton from './components/BaseButton';
 export FacebookButton from './components/FacebookButton';

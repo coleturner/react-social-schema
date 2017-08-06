@@ -1,17 +1,18 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export default class Container extends React.PureComponent {
   static propTypes = {
-    children: React.PropTypes.node.isRequired,
-    className: React.PropTypes.any,
-    schema: React.PropTypes.shape({
-      '@context': React.PropTypes.string.isRequired,
-      '@type': React.PropTypes.string.isRequired,
-      'name': React.PropTypes.string,
-      'sameAs': React.PropTypes.array
+    children: PropTypes.node.isRequired,
+    className: PropTypes.any,
+    schema: PropTypes.shape({
+      '@context': PropTypes.string.isRequired,
+      '@type': PropTypes.string.isRequired,
+      'name': PropTypes.string,
+      'sameAs': PropTypes.array
     }),
-    thisComponent: React.PropTypes.string
+    thisComponent: PropTypes.string
   }
 
   static defaultProps = {
@@ -20,7 +21,7 @@ export default class Container extends React.PureComponent {
   }
 
   static childContextTypes = {
-    schema: React.PropTypes.object
+    schema: PropTypes.object
   }
 
   getChildContext() {
